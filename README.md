@@ -55,23 +55,34 @@ Built using the **MERN stack** and deployed with **Netlify (frontend)** and **Re
 
 ---
 
-## 🛠️ Tech Stack
-
-### Frontend
-- React.js
-- React Router DOM
-- Axios
-- Tailwind CSS
-- Netlify (Deployment)
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- Render (Deployment)
+  ## 🛠️ Tech Stack
+  
+  ### Frontend
+  - React.js
+  - React Router DOM
+  - Axios
+  - Tailwind CSS
+  - Netlify (Deployment)
+  
+  ### Backend
+  - Node.js
+  - Express.js
+  - MongoDB
+  - Mongoose
+  - Render (Deployment)
 
 ---
+if want to run Locally in vs code 
+
+Backend
+cd server
+npm install
+npm start
+
+Frontend
+cd client
+npm install
+npm start
 
 ## 📂 Project Structure
 
