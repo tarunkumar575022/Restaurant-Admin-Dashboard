@@ -21,8 +21,8 @@ export default function Dashboard() {
         setLoading(true);
 
         const [menuRes, ordersRes] = await Promise.all([
-          axios.get("/api/menu"),
-          axios.get("/api/orders"),
+          axios.get("/menu"),
+          axios.get("/orders"),
         ]);
 
         const menuArr = unwrapArray(menuRes.data);
