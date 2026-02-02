@@ -18,8 +18,8 @@ app.use(express.json());
 // ✅ CORS (ONLY ONCE, BEFORE ROUTES)
 const allowedOrigins = [
   "http://localhost:3000",
-  process.env.CLIENT_URL, // e.g. https://beamish-cuchufli-8902d7.netlify.app
-].filter(Boolean);
+  "https://beamish-cuchufli-8902d7.netlify.app",
+];
 
 app.use(
   cors({
