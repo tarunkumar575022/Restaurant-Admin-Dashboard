@@ -9,12 +9,11 @@ const menuSchema = new mongoose.Schema(
       required: true,
     },
     price: { type: Number, required: true },
-    ingredients: [{ type: String, trim: true }], 
     isAvailable: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-menuSchema.index({ name: "text", ingredients: "text"  });
+menuSchema.index({ name: "text" });
 
 export default mongoose.model("MenuItem", menuSchema);

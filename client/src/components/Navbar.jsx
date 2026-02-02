@@ -8,7 +8,7 @@ const active = "bg-black text-white";
 
 export default function Navbar() {
   return (
-    <aside className="w-64 min-h-screen border-r bg-gray-100 p-4 ">
+    <aside className="w-64 min-h-screen border-r bg-white p-4">
       <div className="mb-6">
         <h1 className="text-xl font-bold">Eatoes Admin</h1>
         <p className="text-xs text-gray-500">Restaurant Dashboard</p>

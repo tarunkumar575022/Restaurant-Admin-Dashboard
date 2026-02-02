@@ -5,15 +5,11 @@ import {
   updateMenu,
   deleteMenu,
   toggleAvailability,
-  searchMenuItems,  
 } from "../controllers/menuController.js";
 
 const router = express.Router();
 
-
-
 router.get("/", getMenu);
-router.get("/search", searchMenuItems);
 router.post("/", createMenu);
 router.put("/:id", updateMenu);
 router.delete("/:id", deleteMenu);

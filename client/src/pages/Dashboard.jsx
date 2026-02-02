@@ -1,39 +1,3 @@
-// import useFetch from "../hooks/useFetch";
-
-// const API = import.meta.env.VITE_API_URL;
-
-// export default function Dashboard() {
-//   const menu = useFetch(`${API}/api/menu`, []);
-//   const orders = useFetch(`${API}/api/orders`, []);
-
-//   const menuItems = menu.data || [];
-//   const allOrders = orders.data || [];
-
-//   const availableCount = menuItems.filter((m) => m.isAvailable).length;
-//   const pendingOrders = allOrders.filter((o) => o.status === "pending").length;
-
-//   return (
-//     <div>
-//       <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
-
-//       <div className="grid md:grid-cols-3 gap-4">
-//         <Card title="Total Menu Items" value={menuItems.length} />
-//         <Card title="Available Items" value={availableCount} />
-//         <Card title="Pending Orders" value={pendingOrders} />
-//       </div>
-//     </div>
-//   );
-// }
-
-// function Card({ title, value }) {
-//   return (
-//     <div className="rounded-xl border bg-white p-4 shadow-sm">
-//       <p className="text-sm text-gray-500">{title}</p>
-//       <p className="text-3xl font-bold mt-2">{value}</p>
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 

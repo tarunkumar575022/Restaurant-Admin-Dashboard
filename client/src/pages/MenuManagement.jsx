@@ -16,23 +16,17 @@ export default function MenuManagement() {
 
   // ✅ Fetch menu (supports search query)
   const fetchMenu = async (q = "") => {
-  try {
-    setLoading(true);
-    const url = q
-      ? `/api/menu/search?q=${encodeURIComponent(q)}`
-      : `/api/menu`;
-
-    const res = await axios.get(url);
-    const list = Array.isArray(res.data) ? res.data : res.data.data;
-    setMenu(list || []);
-  } catch (err) {
-    console.error("Fetch menu failed:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+    try {
+      setLoading(true);
+      const res = await axios.get(`/api/menu?q=${encodeURIComponent(q)}`);
+      setMenu(res.data || []);
+    } catch (err) {
+      console.error("Fetch menu failed:", err);
+      setMenu([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Debounced fetch
   useEffect(() => {

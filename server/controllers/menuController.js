@@ -28,23 +28,3 @@ export const toggleAvailability = async (req, res) => {
   await item.save();
   res.json(item);
 };
-
-
-export const searchMenuItems = async (req, res) => {
-  const q = (req.query.q || "").trim();
-
-  if (!q) {
-    return res.status(400).json({ success: false, message: "Query (q) is required" });
-  }
-
-
-  const items = await MenuItem.find(
-    { $text: { $search: q } },
-    { score: { $meta: "textScore" } }
-  )
-    .sort({ score: { $meta: "textScore" }, createdAt: -1 })
-    .limit(50);
-
-  return res.json({ success: true, data: items });
-};
-
