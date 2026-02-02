@@ -13,24 +13,42 @@ const app = express();
 
 /* -------------------- MIDDLEWARE -------------------- */
 app.use(express.json());
+
+const allowedOrigins = [
+  "https://beamish-cuchufli-8902d7.netlify.app", 
+  "http://localhost:3000",                      
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   })
 );
 
-/* -------------------- ROUTES -------------------- */
+
+app.get("/", (req, res) => {
+  res.json({ success: true, message: "Backend is running ✅" });
+});
+
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-/* -------------------- START SERVER -------------------- */
 const PORT = process.env.PORT || 5000;
 
-// 🔴 Connect DB ONLY after env is loaded
 connectDB();
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
