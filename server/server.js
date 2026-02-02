@@ -1,7 +1,8 @@
-import express from "express"
+import express from "express";
 import dotenv from "dotenv";
-import connectDB from "./config/db.js";
 import cors from "cors";
+
+import connectDB from "./config/db.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
@@ -10,22 +11,33 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(express.json());
-app.use(cors({ origin: process.env.CLIENT_URL }));
 
+// ✅ Middleware
+app.use(express.json());
+
+// ✅ CORS (ONLY ONCE, BEFORE ROUTES)
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.CLIENT_URL, // e.g. https://beamish-cuchufli-8902d7.netlify.app
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
+// ✅ Routes
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on ${process.env.PORT}`)
-);
+// ✅ Optional health check (helps verify Render)
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Backend is running" });
+});
 
-
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://beamish-cuchufli-8902d7.netlify.app"
-  ],
-  credentials: true
-}));
+// ✅ Port (Render uses process.env.PORT)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
