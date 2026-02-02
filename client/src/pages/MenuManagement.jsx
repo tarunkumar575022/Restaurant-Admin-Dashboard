@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import MenuCard from "../components/MenuCard";
 import useDebounce from "../hooks/useDebounce";
 
 const emptyForm = { name: "", category: "Appetizer", price: "" };
+
+// ✅ supports both [] and { success:true, data:[] }
+const extractArray = (res) => {
+  const d = res?.data;
+  return Array.isArray(d) ? d : d?.data ?? [];
+};
 
 export default function MenuManagement() {
   const [menu, setMenu] = useState([]);
@@ -12,23 +18,32 @@ export default function MenuManagement() {
 
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch menu (supports search query)
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // ✅ Fetch menu with optional search query
   const fetchMenu = async (q = "") => {
     try {
       setLoading(true);
-      const res = await axios.get(`/api/menu?q=${encodeURIComponent(q)}`);
-      setMenu(res.data || []);
+      setError("");
+
+      const res = await api.get("/menu", {
+        params: q && q.trim() ? { q: q.trim() } : {},
+      });
+
+      setMenu(extractArray(res));
     } catch (err) {
       console.error("Fetch menu failed:", err);
       setMenu([]);
+      setError(err?.response?.data?.message || "Failed to load menu");
     } finally {
       setLoading(false);
     }
   };
 
-  // Debounced fetch
+  // Debounced search fetch
   useEffect(() => {
     fetchMenu(debounced);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,21 +59,29 @@ export default function MenuManagement() {
       price: Number(form.price),
     };
 
-    if (!payload.name || !payload.category || !payload.price) return;
+    // basic validation
+    if (!payload.name) return alert("Name is required");
+    if (!payload.category) return alert("Category is required");
+    if (!payload.price || Number.isNaN(payload.price) || payload.price <= 0)
+      return alert("Enter a valid price");
 
     try {
+      setSaving(true);
+
       if (editingId) {
-        await axios.put(`/api/menu/${editingId}`, payload);
+        await api.put(`/menu/${editingId}`, payload);
       } else {
-        await axios.post(`/api/menu`, payload);
+        await api.post(`/menu`, payload);
       }
 
       setForm(emptyForm);
       setEditingId(null);
-      fetchMenu(debounced);
+      await fetchMenu(debounced);
     } catch (err) {
       console.error("Save failed:", err);
       alert(err?.response?.data?.message || "Failed to save menu item");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -72,23 +95,29 @@ export default function MenuManagement() {
     });
   };
 
+  // ✅ Cancel edit
+  const onCancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+  };
+
   // ✅ Delete item
   const onDelete = async (id) => {
     const ok = window.confirm("Delete this menu item?");
     if (!ok) return;
 
     try {
-      await axios.delete(`/api/menu/${id}`);
-      fetchMenu(debounced);
+      await api.delete(`/menu/${id}`);
+      await fetchMenu(debounced);
     } catch (err) {
       console.error("Delete failed:", err);
       alert(err?.response?.data?.message || "Failed to delete");
     }
   };
 
-  // ✅ Optimistic Availability Toggle
+  // ✅ Optimistic Availability Toggle with safe rollback
   const onToggle = async (id, currentStatus) => {
-    const prev = menu; // snapshot for rollback
+    const prev = [...menu]; // ✅ safe snapshot
 
     // Optimistic UI update
     setMenu((m) =>
@@ -98,12 +127,11 @@ export default function MenuManagement() {
     );
 
     try {
-      await axios.patch(`/api/menu/${id}/availability`);
+      await api.patch(`/menu/${id}/availability`);
     } catch (err) {
       console.error("Toggle failed:", err);
-      // rollback
-      setMenu(prev);
-      alert("Failed to update availability. Reverted changes.");
+      setMenu(prev); // rollback
+      alert(err?.response?.data?.message || "Failed to update availability");
     }
   };
 
@@ -172,18 +200,24 @@ export default function MenuManagement() {
                 />
               </div>
 
-              <button className="w-full rounded-xl bg-black text-white py-2 font-medium hover:opacity-90">
-                {editingId ? "Update Item" : "Create Item"}
+              <button
+                disabled={saving}
+                className="w-full rounded-xl bg-black text-white py-2 font-medium hover:opacity-90 disabled:opacity-60"
+              >
+                {saving
+                  ? editingId
+                    ? "Updating..."
+                    : "Creating..."
+                  : editingId
+                  ? "Update Item"
+                  : "Create Item"}
               </button>
 
               {editingId && (
                 <button
                   type="button"
                   className="w-full rounded-xl border py-2 font-medium"
-                  onClick={() => {
-                    setEditingId(null);
-                    setForm(emptyForm);
-                  }}
+                  onClick={onCancelEdit}
                 >
                   Cancel Edit
                 </button>
@@ -200,7 +234,13 @@ export default function MenuManagement() {
             </div>
           )}
 
-          {!loading && (
+          {!loading && error && (
+            <div className="rounded-xl border bg-white p-4 text-red-600">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && (
             <>
               <div className="grid sm:grid-cols-2 gap-4">
                 {menu.map((item) => (
