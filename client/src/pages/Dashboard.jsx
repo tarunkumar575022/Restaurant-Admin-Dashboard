@@ -15,6 +15,8 @@ export default function Dashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [aiInsights, setAiInsights] = useState("");
+  const [loadingInsights, setLoadingInsights] = useState(false);
 
   const fetchAll = async () => {
     try {
@@ -41,6 +43,19 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAll();
   }, []);
+
+  const fetchAIInsights = async () => {
+    try {
+      setLoadingInsights(true);
+      const res = await api.get("/analytics/ai-insights");
+      setAiInsights(res.data.insights);
+    } catch (err) {
+      console.error("AI Insights fetch failed:", err);
+      alert(err?.response?.data?.message || "Failed to load AI Insights");
+    } finally {
+      setLoadingInsights(false);
+    }
+  };
 
   // ✅ counts
   const totalMenuItems = menu.length;
@@ -123,6 +138,37 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">Pending Orders</p>
           <p className="text-3xl font-bold mt-2">{pendingOrders}</p>
         </div>
+      </div>
+
+      {/* AI Insights Section */}
+      <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 shadow-sm mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-indigo-900 text-lg flex items-center gap-2">
+            <span>🤖</span> AI Business Insights
+          </h3>
+          <button
+            onClick={fetchAIInsights}
+            disabled={loadingInsights}
+            className="rounded-lg bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {loadingInsights ? "Analyzing..." : "Generate Insights"}
+          </button>
+        </div>
+        
+        {aiInsights ? (
+          <div className="space-y-2 text-indigo-800 text-sm bg-white/60 p-4 rounded-lg">
+            {aiInsights.split('\n').filter(line => line.trim()).map((line, idx) => (
+              <p key={idx} className="flex items-start gap-2">
+                <span className="text-indigo-500 mt-0.5">•</span>
+                <span>{line.replace(/^-\s*|^\*\s*/, '')}</span>
+              </p>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-indigo-600/70 italic bg-white/40 p-4 rounded-lg">
+            Click generate to let AI analyze your recent order patterns, top sellers, and revenue...
+          </p>
+        )}
       </div>
 
       {/* Optional: Order status breakdown */}

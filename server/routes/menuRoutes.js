@@ -5,6 +5,7 @@ import {
   updateMenu,
   deleteMenu,
   toggleAvailability,
+  generateDescription,
 } from "../controllers/menuController.js";
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.post("/", createMenu);
 router.put("/:id", updateMenu);
 router.delete("/:id", deleteMenu);
 router.patch("/:id/availability", toggleAvailability);
+router.post("/generate-description", generateDescription);
 
 export default router;

@@ -3,7 +3,7 @@ import api from "../api";
 import MenuCard from "../components/MenuCard";
 import useDebounce from "../hooks/useDebounce";
 
-const emptyForm = { name: "", category: "Appetizer", price: "" };
+const emptyForm = { name: "", category: "Appetizer", price: "", description: "" };
 
 // ✅ supports both [] and { success:true, data:[] }
 const extractArray = (res) => {
@@ -22,6 +22,7 @@ export default function MenuManagement() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [generatingDescription, setGeneratingDescription] = useState(false);
 
   // ✅ Fetch menu with optional search query
   const fetchMenu = async (q = "") => {
@@ -57,6 +58,7 @@ export default function MenuManagement() {
       name: form.name.trim(),
       category: form.category,
       price: Number(form.price),
+      description: form.description,
     };
 
     // basic validation
@@ -92,6 +94,7 @@ export default function MenuManagement() {
       name: item.name || "",
       category: item.category || "Appetizer",
       price: String(item.price ?? ""),
+      description: item.description || "",
     });
   };
 
@@ -99,6 +102,23 @@ export default function MenuManagement() {
   const onCancelEdit = () => {
     setEditingId(null);
     setForm(emptyForm);
+  };
+
+  const generateAIDescription = async () => {
+    if (!form.name.trim()) {
+      alert("Please enter a name first to generate a description.");
+      return;
+    }
+    try {
+      setGeneratingDescription(true);
+      const res = await api.post("/menu/generate-description", { name: form.name.trim() });
+      setForm((prev) => ({ ...prev, description: res.data.description }));
+    } catch (err) {
+      console.error("AI Gen Failed:", err);
+      alert(err?.response?.data?.message || "Failed to generate description");
+    } finally {
+      setGeneratingDescription(false);
+    }
   };
 
   // ✅ Delete item
@@ -197,6 +217,27 @@ export default function MenuManagement() {
                   className="mt-1 w-full rounded-lg border px-3 py-2"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 flex justify-between items-center">
+                  <span>Description</span>
+                  <button
+                    type="button"
+                    onClick={generateAIDescription}
+                    disabled={generatingDescription || !form.name.trim()}
+                    className="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-2 py-1 rounded-md font-medium disabled:opacity-50 transition-colors"
+                  >
+                    {generatingDescription ? "✨ Generating..." : "✨ AI Generate"}
+                  </button>
+                </label>
+                <textarea
+                  className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+                  rows="3"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="e.g. Tender chicken in rich tomato gravy..."
                 />
               </div>
 

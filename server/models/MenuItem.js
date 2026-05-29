@@ -9,6 +9,7 @@ const menuSchema = new mongoose.Schema(
       required: true,
     },
     price: { type: Number, required: true },
+    description: { type: String, default: "" },
     isAvailable: { type: Boolean, default: true },
   },
   { timestamps: true }

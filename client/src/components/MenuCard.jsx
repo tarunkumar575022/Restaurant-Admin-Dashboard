@@ -12,6 +12,12 @@ export default function MenuCard({ item, onToggle, onEdit, onDelete }) {
         </div>
         <p className="text-sm text-gray-600 mt-1">₹ {item.price}</p>
 
+        {item.description && (
+          <p className="text-xs text-gray-500 mt-2 line-clamp-2" title={item.description}>
+            {item.description}
+          </p>
+        )}
+
         <button
           onClick={() => onToggle(item._id, item.isAvailable)}
           className={`mt-3 inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium ${

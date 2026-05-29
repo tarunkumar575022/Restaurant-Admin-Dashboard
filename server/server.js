@@ -11,7 +11,7 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 const app = express();
 
-/* -------------------- MIDDLEWARE -------------------- */
+
 app.use(express.json());
 
 const allowedOrigins = [
